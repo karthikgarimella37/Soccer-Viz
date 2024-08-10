@@ -13,6 +13,7 @@
 [Ss]cripts
 pyvenv.cfg
 .venv
+venv/
 pip-selfcheck.json
 
 ### VisualStudioCode ###
@@ -33,5 +34,12 @@ pip-selfcheck.json
 # Ignore all local history of files
 .history
 .ionide
+
+
+### Flask.Python Stack ###
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,venv

@@ -40,8 +40,9 @@ select * from information_schema.tables
 
 CREATE SEQUENCE seq_epl_league_table INCREMENT BY 1 MINVALUE 1 START 1 NO CYCLE;
 
+
 create table epl_league_table
-(	row_id numeric,
+(	row_id numeric default nextval('seq_epl_league_table'),
 	league_position numeric(2),
 	club_name varchar(255),
 	matches_played numeric(2),
@@ -67,6 +68,6 @@ create table epl_league_table
 	league_tier varchar,
 	gender varchar,
 	datasource varchar,
-	etl_insert_date date,
-	etl_update_date date
+	etl_insert_date date default CURRENT_TIMESTAMP,
+	etl_update_date date default CURRENT_TIMESTAMP
 );
