@@ -10,3 +10,4 @@ requests==2.32.3
 requests_ip_rotator==1.0.14 
 seaborn==0.13.2
 urllib3==1.26.19
+plottable==0.1.5

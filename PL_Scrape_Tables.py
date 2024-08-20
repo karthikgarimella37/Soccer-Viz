@@ -98,3 +98,5 @@ for i in range(1888, 2025):
 
 print('Data Dump Done!')
 
+# To generate csv file of the database table
+# df.to_csv('db_data.csv')
