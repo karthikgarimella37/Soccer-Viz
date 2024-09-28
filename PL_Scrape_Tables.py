@@ -10,18 +10,19 @@ import os
 import datetime
 import json
 from urllib.request import urlopen
+from urllib.parse import quote
 # from PIL import Image
 # from highlight_text import fig_text
 # from mplsoccer import Bumpy, FontManager, add_image
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from requests_ip_rotator import ApiGateway, EXTRA_REGIONS
 import warnings
 
 warnings.filterwarnings('ignore')
 
-os.environ['AWS_ACCESS_KEY_ID'] = 'AKIA47CRW53BPNMGXUHN'
-os.environ['AWS_SECRET_ACCESS_KEY'] = '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'
-os.environ['AWS_DEFAULT_REGION'] = 'us-west-1'
+os.environ['AWS_ACCESS_KEY_ID'] = 'AWS_ACCESS_KEY_ID'
+os.environ['AWS_SECRET_ACCESS_KEY'] = 'AWS_SECRET_ACCESS_KEY'
+os.environ['AWS_DEFAULT_REGION'] = 'AWS_DEFAULT_REGION'
 
 # Initialize the ApiGateway
 gateway = ApiGateway('https://fbref.com/', regions = EXTRA_REGIONS)
@@ -33,8 +34,15 @@ session.mount('https://fbref.com/', gateway)
 
 df = pd.DataFrame()
 
-# Looping for a set range - incremental load will be done from 2023-24 season
-for i in range(1888, 2025):
+engine = create_engine('postgresql+psycopg2://postgres:Karthik37@localhost:5432/Football')
+# conn = engine.connect()
+
+with engine.connect() as conn:
+    latest_season_sql = conn.execute(text('select max(season) from epl_league_table'))
+    latest_season = latest_season_sql.fetchone()[0][5:]
+
+# Looping for a set range - incremental load will be done from 2024-25 season
+for i in range(int(latest_season), datetime.datetime.now().year + 1):
     try:
         # Getting the site for each consecutive year
         
@@ -46,14 +54,19 @@ for i in range(1888, 2025):
         fbref_table = pd.read_html(fbref_site)[0]
         fbref_table['season'] = str(i) + '/' + str(i+1)
 
+        if 'Last 5' in fbref_table:
+            fbref_table = fbref_table.drop(columns = ['Last 5'])
+
         if fbref_table.iloc[0]['MP'] == 0:
-            continue
+            break
 
         else:
             df = pd.concat([df, fbref_table])
+        
 
 
             print('Data Extracted')
+
             
             # input()
             if "xG" in fbref_table.columns:
@@ -72,8 +85,7 @@ for i in range(1888, 2025):
             
             print('Table with new columns created')
             # Creating engine to connect to PostgreSQL DB
-            engine = create_engine('postgresql+psycopg2://postgres:Karthik37@localhost:5432/Football')
-            conn = engine.connect()
+
 
 
 
@@ -82,17 +94,23 @@ for i in range(1888, 2025):
 
             # Inserting into the temp table
 
-            if "xg" in fbref_table.columns:
-                fbref_table.to_sql('epl_league_table_tmp', conn, if_exists = 'append', index = False)
-                print('Data Appened to the tmp table')
-            else:
-                fbref_table.to_sql('epl_league_table_tmp_no_xg', conn, if_exists = 'append', index = False)
-                print('Data Appened to the tmp table')
+            with engine.connect() as conn:
+                table_name = 'epl_league_table_tmp' if 'xg' in fbref_table.columns else 'epl_league_table_tmp_no_xg'
+                fbref_table.to_sql(table_name, conn, if_exists='append', index=False)
+                print(f"Data for season {i}/{i + 1} appended to {table_name}.")
+
+            # if "xg" in fbref_table.columns:
+            #     fbref_table.to_sql('epl_league_table_tmp', conn, if_exists = 'append', index = False)
+            #     print('Data Appened to the tmp table')
+            # else:
+            #     fbref_table.to_sql('epl_league_table_tmp_no_xg', conn, if_exists = 'append', index = False)
+            #     print('Data Appened to the tmp table')
 
             conn.close
     except Exception as e:
         print('Halted, Error')
         print(e)
+        conn.close()
         continue
 
 
@@ -100,3 +118,5 @@ print('Data Dump Done!')
 
 # To generate csv file of the database table
 # df.to_csv('db_data.csv')
+
+
