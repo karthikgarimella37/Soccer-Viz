@@ -42,4 +42,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+
+.streamlit/secrets.toml
+
+*.toml
+
+Soccer-Viz-old/
+
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,venv

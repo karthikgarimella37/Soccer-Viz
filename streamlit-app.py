@@ -8,7 +8,8 @@ import psycopg2 as psy
 import datetime
 import json
 from urllib.request import urlopen
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
+from urllib.parse import quote
 from requests_ip_rotator import ApiGateway, EXTRA_REGIONS
 import decimal
 import io
@@ -16,12 +17,24 @@ from plottable import ColumnDefinition, Table
 from plottable.cmap import normed_cmap
 from plottable.plots import image
 
-engine = create_engine('postgresql+psycopg2://postgres:Karthik37@localhost:5432/Football')
+# engine = create_engine('postgresql+psycopg2://postgres:Karthik37@localhost:5432/Football')
 
+# conn = engine.connect()
+
+username = quote(st.secrets["connections"]["postgresql"]["username"])
+password = st.secrets["connections"]["postgresql"]["password"]
+
+host = st.secrets["connections"]["postgresql"]['host']
+port = st.secrets["connections"]["postgresql"]['port']
+database = st.secrets["connections"]["postgresql"]['database']
+
+connection_string = f'postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}'
+
+engine = create_engine(connection_string)
 conn = engine.connect()
 # conn = st.connection("postegresql", type = 'sql')
 
-df = conn.execute('Select * from epl_league_table')
+df = conn.execute(text('select * from epl_league_table'))
 df = pd.DataFrame(df)
 
 # df = pd.read_csv('db_data.csv', index_col=False)
