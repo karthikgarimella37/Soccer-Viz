@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>League Standings</title>
+</head>
+<body>
+    <h1>League Standings by Season</h1>
+    <form id="seasonForm">
+        <label for="season">Select a Season:</label>
+        <select id="season" name="season">
+            {% for season in seasons %}
+                <option value="{{ season }}">{{ season }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Show Standings</button>
+    </form>
+
+    <div id="tableImage">
+        <!-- This is where the image will be displayed -->
+        <img id="standingsImage" src="" alt="League Standings" style="display:none;">
+    </div>
+
+    <script>
+        document.getElementById('seasonForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var season = document.getElementById('season').value;
+            var img = document.getElementById('standingsImage');
+            img.src = '/table/plot.png?season=' + season;
+            img.style.display = 'block';
+        });
+    </script>
+</body>
+</html>
